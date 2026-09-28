@@ -1,5 +1,4 @@
 # Terminal 24 jam di browser HP (tanpa VS Code): ttyd + tmux + Claude Code / OpenCode / CodeBuddy CLI + gh
-# Buka https://<domain-railway> -> login user/password -> langsung terminal (sesi tmux "main" yang awet)
 FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,16 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends gh \
     && rm -rf /var/lib/apt/lists/*
 
-# ttyd = terminal web (binary resmi)
 RUN curl -fsSL https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64 -o /usr/local/bin/ttyd \
     && chmod +x /usr/local/bin/ttyd
 
-# Agent CLI (di image, tidak makan volume)
 RUN npm install -g @anthropic-ai/claude-code opencode-ai @tencent-ai/codebuddy-code && npm cache clean --force
 
 RUN useradd -m -u 1000 -s /bin/bash dev && mkdir -p /run/sshd
 
-# tmux enak dipakai di HP: mouse/scroll jalan, history panjang
 RUN printf '%s\n' \
       'set -g mouse on' \
       'set -g history-limit 50000' \
@@ -38,8 +34,7 @@ RUN printf '%s\n' \
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-ENV HOME=/home/dev PORT=7681
+ENV HOME=/home/dev TTYD_PORT=7681
 EXPOSE 7681 22
-VOLUME ["/home/dev"]
 
 CMD ["/start.sh"]
